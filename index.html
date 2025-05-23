@@ -46,24 +46,29 @@
 
     .checkbox-group {
       margin-top: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
     .checkbox-group label {
       font-weight: normal;
       display: flex;
-      align-items: start;
-      gap: 10px;
-      margin-top: 10px;
+      align-items: center;
       background: #fffefb;
       padding: 10px;
       border: 1px solid #d4af37;
       border-radius: 10px;
+      font-size: 0.95em;
+      line-height: 1.4em;
     }
 
     .checkbox-group input[type="checkbox"] {
       accent-color: #d4af37;
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
+      margin-inline-start: 8px;
+      flex-shrink: 0;
     }
 
     button {
@@ -126,8 +131,8 @@
       <input type="date" id="dob" name="dob" required>
 
       <div class="checkbox-group">
-        <label><input type="checkbox" id="agree1"> מאשר הרשמה למועדון הלקוחות "חברים של טופי" וקבלת הודעות ועדכונים</label>
-        <label><input type="checkbox" id="agree2"> מספר המשתתפים מוגבל בהתאם לזמני הפעילות במתחם. לא כל הנרשמים יספיקו להשתתף במסגרת הזמן הנתון, אך במידה ולא, תוזמנו למשחקים הבאים</label>
+        <label><input type="checkbox" id="agree1">מאשר הרשמה למועדון הלקוחות "חברים של טופי" וקבלת הודעות ועדכונים</label>
+        <label><input type="checkbox" id="agree2">מספר המשתתפים מוגבל בהתאם לזמני הפעילות במתחם. לא כל הנרשמים יספיקו להשתתף במסגרת הזמן הנתון, אך במידה ולא, תוזמנו למשחקים הבאים</label>
       </div>
 
       <button type="submit" id="submitBtn">שלח</button>
