@@ -134,11 +134,12 @@
       submitBtn.disabled = true;
 
       const timestamp = new Date().toISOString();
+      const phone = form.phone.value.trim();
       const data = {
         timestamp,
         firstName: form.firstName.value,
         lastName: form.lastName.value,
-        phone: form.phone.value,
+        phone,
         city: form.city.value,
         dateOfBirth: form.dob.value,
         confirmation: form.confirmation.value
@@ -146,6 +147,16 @@
 
       try {
         const { eventSheet, masterSheet } = config[config.use];
+
+        // Check if phone already exists in event sheet
+        const eventData = await fetch(eventSheet).then(res => res.json());
+        const duplicate = eventData.some(entry => entry.phone === phone);
+
+        if (duplicate) {
+          alert('מספר הטלפון הזה כבר נרשם בעבר. לא ניתן להירשם פעמיים.');
+          submitBtn.disabled = false;
+          return;
+        }
 
         // Add to event sheet
         await fetch(eventSheet, {
@@ -156,7 +167,7 @@
 
         // Check if phone already exists in master sheet
         const masterData = await fetch(masterSheet).then(res => res.json());
-        const exists = masterData.some(entry => entry.phone === data.phone);
+        const exists = masterData.some(entry => entry.phone === phone);
 
         if (!exists) {
           await fetch(masterSheet, {
