@@ -51,9 +51,19 @@
     .checkbox-group label {
       font-weight: normal;
       display: flex;
-      align-items: center;
+      align-items: start;
       gap: 10px;
       margin-top: 10px;
+      background: #fffefb;
+      padding: 10px;
+      border: 1px solid #d4af37;
+      border-radius: 10px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      accent-color: #d4af37;
+      width: 20px;
+      height: 20px;
     }
 
     button {
@@ -169,7 +179,7 @@
         phone,
         city: form.city.value,
         dateOfBirth: form.dob.value,
-        confirmation: '✔️'
+        confirmation: agree1.checked && agree2.checked ? '✔️✔️' : ''
       };
 
       try {
