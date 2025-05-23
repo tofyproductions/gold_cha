@@ -118,12 +118,11 @@
 
   <script>
     const config = {
-      // Replace these with your actual Sheets.best API endpoints
       prod: {
-        eventSheet: 'https://sheets.best/api/v1/YOUR_EVENT_ENDPOINT',
-        masterSheet: 'https://sheets.best/api/v1/YOUR_MASTER_ENDPOINT'
+        eventSheet: 'https://api.sheetbest.com/sheets/8b8d86e8-2a58-42d5-a4f9-b7432569d721',
+        masterSheet: 'https://api.sheetbest.com/sheets/6fa4234d-1425-4ad4-8a46-508f2eae5ff6'
       },
-      use: 'prod' // Change to 'test' if needed
+      use: 'prod'
     };
 
     const form = document.getElementById('goldenForm');
@@ -148,7 +147,7 @@
       try {
         const { eventSheet, masterSheet } = config[config.use];
 
-        // Post to event-specific sheet
+        // Add to event sheet
         await fetch(eventSheet, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -159,7 +158,6 @@
         const masterData = await fetch(masterSheet).then(res => res.json());
         const exists = masterData.some(entry => entry.phone === data.phone);
 
-        // If not exists, post to master sheet
         if (!exists) {
           await fetch(masterSheet, {
             method: 'POST',
@@ -168,7 +166,6 @@
           });
         }
 
-        // Reset form and show popup
         form.reset();
         popupMsg.style.display = 'block';
         setTimeout(() => {
@@ -176,7 +173,7 @@
           submitBtn.disabled = false;
         }, 3000);
       } catch (error) {
-        alert('אירעה שגיאה בשליחה. אנא נסה שוב.');
+        alert('אירעה שגיאה בשליחה. נסה שוב מאוחר יותר.');
         console.error(error);
         submitBtn.disabled = false;
       }
