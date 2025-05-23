@@ -44,6 +44,18 @@
       box-sizing: border-box;
     }
 
+    .checkbox-group {
+      margin-top: 15px;
+    }
+
+    .checkbox-group label {
+      font-weight: normal;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
     button {
       margin-top: 20px;
       width: 100%;
@@ -95,7 +107,7 @@
       <input type="text" id="lastName" name="lastName" required>
 
       <label for="phone">מספר פלאפון</label>
-      <input type="tel" id="phone" name="phone" required pattern="[0-9]{9,10}">
+      <input type="tel" id="phone" name="phone" required>
 
       <label for="city">עיר מגורים</label>
       <input type="text" id="city" name="city" required>
@@ -103,12 +115,10 @@
       <label for="dob">תאריך לידה</label>
       <input type="date" id="dob" name="dob" required>
 
-      <label for="confirmation">אישור משתתף</label>
-      <select id="confirmation" name="confirmation" required>
-        <option value="">בחר...</option>
-        <option value="✔️">✔️</option>
-        <option value="❌">❌</option>
-      </select>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="agree1"> מאשר הרשמה למועדון הלקוחות "חברים של טופי" וקבלת הודעות ועדכונים</label>
+        <label><input type="checkbox" id="agree2"> מספר המשתתפים מוגבל בהתאם לזמני הפעילות במתחם. לא כל הנרשמים יספיקו להשתתף במסגרת הזמן הנתון, אך במידה ולא, תוזמנו למשחקים הבאים</label>
+      </div>
 
       <button type="submit" id="submitBtn">שלח</button>
     </form>
@@ -128,13 +138,30 @@
     const form = document.getElementById('goldenForm');
     const submitBtn = document.getElementById('submitBtn');
     const popupMsg = document.getElementById('popupMsg');
+    const phoneInput = document.getElementById('phone');
+    const agree1 = document.getElementById('agree1');
+    const agree2 = document.getElementById('agree2');
+
+    phoneInput.addEventListener('input', () => {
+      let value = phoneInput.value.replace(/[^0-9]/g, '').slice(0, 10);
+      if (value.length > 3) {
+        value = value.slice(0, 3) + '-' + value.slice(3);
+      }
+      phoneInput.value = value;
+    });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      if (!agree1.checked || !agree2.checked) {
+        alert('יש לאשר את שתי התיבות על מנת להמשיך בהרשמה.');
+        return;
+      }
+
       submitBtn.disabled = true;
 
       const timestamp = new Date().toISOString();
-      const phone = form.phone.value.trim();
+      const phone = phoneInput.value.trim();
       const data = {
         timestamp,
         firstName: form.firstName.value,
@@ -142,13 +169,12 @@
         phone,
         city: form.city.value,
         dateOfBirth: form.dob.value,
-        confirmation: form.confirmation.value
+        confirmation: '✔️'
       };
 
       try {
         const { eventSheet, masterSheet } = config[config.use];
 
-        // Check if phone already exists in event sheet
         const eventData = await fetch(eventSheet).then(res => res.json());
         const duplicate = eventData.some(entry => entry.phone === phone);
 
@@ -158,14 +184,12 @@
           return;
         }
 
-        // Add to event sheet
         await fetch(eventSheet, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
 
-        // Check if phone already exists in master sheet
         const masterData = await fetch(masterSheet).then(res => res.json());
         const exists = masterData.some(entry => entry.phone === phone);
 
