@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
@@ -5,15 +6,16 @@
   <title>אתגר הזהב - טופס הרשמה</title>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
   <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
     body {
       font-family: 'Rubik', sans-serif;
       background: linear-gradient(to bottom, #fff8e7, #ffffff);
       margin: 0;
       padding: 20px;
     }
-
     .container {
-      max-width: 600px;
+      max-width: 640px;
       margin: auto;
       background: #ffffff;
       border: 2px solid #d4af37;
@@ -21,40 +23,44 @@
       padding: 30px;
       box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
     }
-
     h1 {
       text-align: center;
       color: #d4af37;
       font-size: 2em;
-      margin-bottom: 20px;
+      margin: 0 0 20px;
     }
-
+    .field { margin: 12px 0 0; }
     label {
       display: block;
-      margin: 10px 0 5px;
+      margin: 0 0 6px;
       font-weight: 600;
     }
-
+    input, select, button {
+      font-family: inherit;
+      font-size: 1em;
+    }
     input, select {
       width: 100%;
       padding: 10px;
-      font-size: 1em;
       border: 1px solid #ccc;
       border-radius: 8px;
-      box-sizing: border-box;
+      background: #fff;
     }
-
+    input:invalid { border-color: #d26767; }
+    .helper {
+      font-size: .85em;
+      color: #666;
+      margin-top: 4px;
+    }
     .checkbox-group {
-      margin-top: 15px;
-      display: flex;
-      flex-direction: column;
+      margin-top: 16px;
+      display: grid;
       gap: 10px;
     }
-
-    .checkbox-group label {
-      font-weight: normal;
+    .checkbox {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
+      gap: 8px;
       background: #fffefb;
       padding: 10px;
       border: 1px solid #d4af37;
@@ -62,33 +68,32 @@
       font-size: 0.95em;
       line-height: 1.4em;
     }
-
-    .checkbox-group input[type="checkbox"] {
+    .checkbox input[type="checkbox"] {
       accent-color: #d4af37;
       width: 18px;
       height: 18px;
-      margin-inline-start: 8px;
+      margin-top: 2px;
       flex-shrink: 0;
     }
-
     button {
-      margin-top: 20px;
+      margin-top: 22px;
       width: 100%;
       padding: 12px;
       background-color: #d4af37;
       border: none;
       color: white;
-      font-size: 1.2em;
-      font-weight: bold;
+      font-size: 1.15em;
+      font-weight: 700;
       border-radius: 10px;
       cursor: pointer;
+      transition: transform .04s ease;
     }
-
+    button:active { transform: translateY(1px); }
     button:disabled {
       background-color: #bba254;
       cursor: not-allowed;
+      opacity: .85;
     }
-
     .popup {
       position: fixed;
       top: 20px;
@@ -96,52 +101,90 @@
       transform: translateX(-50%);
       background-color: #d4af37;
       color: white;
-      padding: 15px 30px;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 1.1em;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 1.05em;
       display: none;
       z-index: 9999;
     }
-
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;
+    }
     @media (max-width: 600px) {
-      .container {
-        padding: 20px;
-      }
+      .container { padding: 20px; }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>טופס הרשמה - אתגר הזהב</h1>
-    <form id="goldenForm">
-      <label for="firstName">שם פרטי</label>
-      <input type="text" id="firstName" name="firstName" required>
 
-      <label for="lastName">שם משפחה</label>
-      <input type="text" id="lastName" name="lastName" required>
+    <form id="goldenForm" novalidate>
+      <!-- שם פרטי -->
+      <div class="field">
+        <label for="firstName">שם פרטי</label>
+        <input type="text" id="firstName" name="firstName" autocomplete="given-name" required>
+      </div>
 
-      <label for="phone">מספר פלאפון</label>
-      <input type="tel" id="phone" name="phone" required>
+      <!-- שם משפחה -->
+      <div class="field">
+        <label for="lastName">שם משפחה</label>
+        <input type="text" id="lastName" name="lastName" autocomplete="family-name" required>
+      </div>
 
-      <label for="city">עיר מגורים</label>
-      <input type="text" id="city" name="city" required>
+      <!-- טלפון -->
+      <div class="field">
+        <label for="phone">מספר פלאפון</label>
+        <input
+          type="tel"
+          id="phone"
+          name="phone"
+          inputmode="numeric"
+          autocomplete="tel-national"
+          placeholder="050-1234567"
+          pattern="0[2-9][0-9]-?[0-9]{7}"
+          required
+          aria-describedby="phoneHelp"
+        >
+        <div id="phoneHelp" class="helper">דוגמה: 050-1234567. יש להזין מספר ישראלי בן 10 ספרות.</div>
+      </div>
 
-      <label for="dob">תאריך לידה</label>
-      <input type="date" id="dob" name="dob" required>
+      <!-- עיר -->
+      <div class="field">
+        <label for="city">עיר מגורים</label>
+        <input type="text" id="city" name="city" autocomplete="address-level2" required>
+      </div>
 
+      <!-- תאריך לידה -->
+      <div class="field">
+        <label for="dob">תאריך לידה</label>
+        <input type="date" id="dob" name="dob" required>
+      </div>
+
+      <!-- אישורים -->
       <div class="checkbox-group">
-        <label><input type="checkbox" id="agree1">מאשר הרשמה למועדון הלקוחות "חברים של טופי" וקבלת הודעות ועדכונים</label>
-        <label><input type="checkbox" id="agree2">מספר המשתתפים מוגבל בהתאם לזמני הפעילות במתחם. לא כל הנרשמים יספיקו להשתתף במסגרת הזמן הנתון, אך במידה ולא, תוזמנו למשחקים הבאים</label>
+        <label class="checkbox" for="agree1">
+          <input type="checkbox" id="agree1" required>
+          מאשר הרשמה למועדון הלקוחות "חברים של טופי" וקבלת הודעות ועדכונים
+        </label>
+        <label class="checkbox" for="agree2">
+          <input type="checkbox" id="agree2" required>
+          מספר המשתתפים מוגבל בהתאם לזמני הפעילות במתחם. ייתכן שחלק מהנרשמים לא יספיקו להשתתף במסגרת הזמן ויוזמנו לפעילות הבאה.
+        </label>
       </div>
 
       <button type="submit" id="submitBtn">שלח</button>
+      <div class="sr-only" aria-live="polite" id="liveRegion"></div>
     </form>
   </div>
 
-  <div class="popup" id="popupMsg">!תודה שאישרת הגעה - נתראה באתגר הזהב 🎉</div>
+  <div class="popup" id="popupMsg">תודה! ההרשמה התקבלה - נתראה באתגר הזהב 🎉</div>
 
   <script>
+    // ----- קונפיגורציה -----
     const config = {
       prod: {
         eventSheet: 'https://api.sheetbest.com/sheets/8b8d86e8-2a58-42d5-a4f9-b7432569d721',
@@ -150,82 +193,109 @@
       use: 'prod'
     };
 
+    // ----- אלמנטים -----
     const form = document.getElementById('goldenForm');
     const submitBtn = document.getElementById('submitBtn');
     const popupMsg = document.getElementById('popupMsg');
     const phoneInput = document.getElementById('phone');
     const agree1 = document.getElementById('agree1');
     const agree2 = document.getElementById('agree2');
+    const liveRegion = document.getElementById('liveRegion');
+
+    // ----- שירותים -----
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+    // תצוגה עם מקף, אבל שמירה תמיד בלי מקף
+    const formatPhoneForView = (digits) => {
+      const d = digits.replace(/\D/g, '').slice(0, 10);
+      if (d.length <= 3) return d;
+      return d.slice(0, 3) + '-' + d.slice(3);
+    };
+    const normalizePhoneForSave = (value) => value.replace(/\D/g, ''); // "0501234567"
+
+    // ולידציית טופס ידידותית
+    const setCheckboxValidity = () => {
+      const ok = agree1.checked && agree2.checked;
+      agree1.setCustomValidity(ok ? '' : 'יש לאשר את שתי התיבות');
+      agree2.setCustomValidity(ok ? '' : 'יש לאשר את שתי התיבות');
+    };
 
     phoneInput.addEventListener('input', () => {
-      let value = phoneInput.value.replace(/[^0-9]/g, '').slice(0, 10);
-      if (value.length > 3) {
-        value = value.slice(0, 3) + '-' + value.slice(3);
-      }
-      phoneInput.value = value;
+      phoneInput.value = formatPhoneForView(phoneInput.value);
     });
+    agree1.addEventListener('change', setCheckboxValidity);
+    agree2.addEventListener('change', setCheckboxValidity);
+
+    // מניעת שליחה כפולה
+    let inFlight = false;
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      setCheckboxValidity();
 
-      if (!agree1.checked || !agree2.checked) {
-        alert('יש לאשר את שתי התיבות על מנת להמשיך בהרשמה.');
+      // אם יש שדות לא תקינים - תן לדפדפן להדגיש
+      if (!form.checkValidity()) {
+        form.reportValidity();
         return;
       }
-
+      if (inFlight) return;
+      inFlight = true;
       submitBtn.disabled = true;
 
       const timestamp = new Date().toISOString();
-      const phone = phoneInput.value.trim();
-      const data = {
+      const phoneDigits = normalizePhoneForSave(phoneInput.value);
+      const payload = {
         timestamp,
-        firstName: form.firstName.value,
-        lastName: form.lastName.value,
-        phone,
-        city: form.city.value,
-        dateOfBirth: form.dob.value,
-        confirmation: agree1.checked && agree2.checked ? '✔️✔️' : ''
+        firstName: form.firstName.value.trim(),
+        lastName: form.lastName.value.trim(),
+        phone: phoneDigits,            // נשמר בלי מקפים
+        city: form.city.value.trim(),
+        dateOfBirth: form.dob.value,   // YYYY-MM-DD
+        confirmation: '✔️✔️'
       };
 
       try {
         const { eventSheet, masterSheet } = config[config.use];
 
-        const eventData = await fetch(eventSheet).then(res => res.json());
-        const duplicate = eventData.some(entry => entry.phone === phone);
-
-        if (duplicate) {
-          alert('מספר הטלפון הזה כבר נרשם בעבר. לא ניתן להירשם פעמיים.');
-          submitBtn.disabled = false;
+        // בדיקת כפילות - מבוססת טלפון מנורמל
+        const eventData = await fetch(eventSheet, { cache: 'no-store' }).then(r => r.json());
+        const isDup = eventData.some(row => String(row.phone || '').replace(/\D/g, '') === phoneDigits);
+        if (isDup) {
+          alert('מספר הטלפון הזה כבר נרשם. לא ניתן להירשם פעמיים לאירוע.');
           return;
         }
 
+        // שמירה לאירוע
         await fetch(eventSheet, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
+          body: JSON.stringify(payload)
         });
 
-        const masterData = await fetch(masterSheet).then(res => res.json());
-        const exists = masterData.some(entry => entry.phone === phone);
-
-        if (!exists) {
+        // הוספה לטבלה המרכזת אם עדיין לא קיים
+        const masterData = await fetch(masterSheet, { cache: 'no-store' }).then(r => r.json());
+        const existsInMaster = masterData.some(row => String(row.phone || '').replace(/\D/g, '') === phoneDigits);
+        if (!existsInMaster) {
           await fetch(masterSheet, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: JSON.stringify(payload)
           });
         }
 
+        // הצלחה - איפוס תצוגתי
         form.reset();
+        phoneInput.value = ''; // שלא יישאר מקף
         popupMsg.style.display = 'block';
-        setTimeout(() => {
-          popupMsg.style.display = 'none';
-          submitBtn.disabled = false;
-        }, 3000);
-      } catch (error) {
-        alert('אירעה שגיאה בשליחה. נסה שוב מאוחר יותר.');
-        console.error(error);
+        liveRegion.textContent = 'ההרשמה נקלטה בהצלחה';
+        await sleep(2800);
+        popupMsg.style.display = 'none';
+      } catch (err) {
+        console.error(err);
+        alert('אירעה שגיאה בשליחה. נסו שוב.');
+      } finally {
         submitBtn.disabled = false;
+        inFlight = false;
       }
     });
   </script>
