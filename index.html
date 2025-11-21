@@ -75,6 +75,11 @@
       margin-top: 2px;
       flex-shrink: 0;
     }
+    .checkbox a {
+      color: #d4af37;
+      font-weight: 700;
+      text-decoration: underline;
+    }
     button {
       margin-top: 22px;
       width: 100%;
@@ -164,15 +169,11 @@
         <input type="date" id="dob" name="dob" required>
       </div>
 
-      <!-- אישורים -->
+      <!-- אישור תקנון -->
       <div class="checkbox-group">
-        <label class="checkbox" for="agree1">
-          <input type="checkbox" id="agree1" required>
-          מאשר הרשמה למועדון הלקוחות "חברים של טופי" וקבלת הודעות ועדכונים
-        </label>
-        <label class="checkbox" for="agree2">
-          <input type="checkbox" id="agree2" required>
-          מספר המשתתפים מוגבל בהתאם לזמני הפעילות במתחם. ייתכן שחלק מהנרשמים לא יספיקו להשתתף במסגרת הזמן ויוזמנו לפעילות הבאה.
+        <label class="checkbox" for="agreeRules">
+          <input type="checkbox" id="agreeRules" required>
+          אני מאשר את ה<a href="https://drive.google.com/file/d/16GWLvftCHSpLLX4MIwBWCpyOnZPByigw/view?usp=sharing" target="_blank" rel="noopener noreferrer">תקנון</a>
         </label>
       </div>
 
@@ -198,8 +199,7 @@
     const submitBtn = document.getElementById('submitBtn');
     const popupMsg = document.getElementById('popupMsg');
     const phoneInput = document.getElementById('phone');
-    const agree1 = document.getElementById('agree1');
-    const agree2 = document.getElementById('agree2');
+    const agreeRules = document.getElementById('agreeRules');
     const liveRegion = document.getElementById('liveRegion');
 
     // ----- שירותים -----
@@ -213,18 +213,16 @@
     };
     const normalizePhoneForSave = (value) => value.replace(/\D/g, ''); // "0501234567"
 
-    // ולידציית טופס ידידותית
+    // ולידציה לתיבת תקנון
     const setCheckboxValidity = () => {
-      const ok = agree1.checked && agree2.checked;
-      agree1.setCustomValidity(ok ? '' : 'יש לאשר את שתי התיבות');
-      agree2.setCustomValidity(ok ? '' : 'יש לאשר את שתי התיבות');
+      const ok = agreeRules.checked;
+      agreeRules.setCustomValidity(ok ? '' : 'יש לאשר את התקנון');
     };
 
     phoneInput.addEventListener('input', () => {
       phoneInput.value = formatPhoneForView(phoneInput.value);
     });
-    agree1.addEventListener('change', setCheckboxValidity);
-    agree2.addEventListener('change', setCheckboxValidity);
+    agreeRules.addEventListener('change', setCheckboxValidity);
 
     // מניעת שליחה כפולה
     let inFlight = false;
@@ -243,20 +241,22 @@
       submitBtn.disabled = true;
 
       const timestamp = new Date().toISOString();
-      // בדיקת גיל
-const birthDate = new Date(form.dob.value);
-const today = new Date();
-const age = today.getFullYear() - birthDate.getFullYear();
-const monthDiff = today.getMonth() - birthDate.getMonth();
-const dayDiff = today.getDate() - birthDate.getDate();
-const isUnder14 = age < 14 || (age === 14 && (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)));
 
-if (isUnder14) {
-  alert('ההרשמה מותרת מגיל 14 ומעלה בלבד.');
-  submitBtn.disabled = false;
-  inFlight = false;
-  return;
-}
+      // בדיקת גיל
+      const birthDate = new Date(form.dob.value);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      const dayDiff = today.getDate() - birthDate.getDate();
+      const isUnder14 = age < 14 || (age === 14 && (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)));
+
+      if (isUnder14) {
+        alert('ההרשמה מותרת מגיל 14 ומעלה בלבד.');
+        submitBtn.disabled = false;
+        inFlight = false;
+        return;
+      }
+
       const phoneDigits = normalizePhoneForSave(phoneInput.value);
       const payload = {
         timestamp,
