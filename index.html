@@ -75,10 +75,17 @@
       margin-top: 2px;
       flex-shrink: 0;
     }
+    .checkbox-text {
+      display: inline;
+      white-space: nowrap;
+    }
     .checkbox a {
       color: #d4af37;
       font-weight: 700;
       text-decoration: underline;
+      margin: 0;
+      padding: 0;
+      display: inline;
     }
     button {
       margin-top: 22px;
@@ -170,13 +177,12 @@
       </div>
 
       <!-- אישור תקנון -->
-<div class="checkbox-group">
-  <label class="checkbox" for="agreeRules">
-    <input type="checkbox" id="agreeRules" required>
-    אני מאשר את ה<a href="https://drive.google.com/file/d/16GWLvftCHSpLLX4MIwBWCpyOnZPByigw/view?usp=sharing" target="_blank" rel="noopener noreferrer">תקנון</a>
-  </label>
-</div>
-
+      <div class="checkbox-group">
+        <label class="checkbox" for="agreeRules">
+          <input type="checkbox" id="agreeRules" required>
+          <span class="checkbox-text">אני מאשר את ה<a href="https://drive.google.com/file/d/16GWLvftCHSpLLX4MIwBWCpyOnZPByigw/view?usp=sharing" target="_blank" rel="noopener noreferrer">תקנון</a></span>
+        </label>
+      </div>
 
       <button type="submit" id="submitBtn">שלח</button>
       <div class="sr-only" aria-live="polite" id="liveRegion"></div>
