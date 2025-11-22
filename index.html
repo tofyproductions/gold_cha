@@ -272,13 +272,11 @@
       try {
         const { eventSheet, masterSheet } = config[config.use];
 
-        // בדיקת כפילות - מבוססת טלפון מנורמל
+        // 1. בדיקת כפילות ב-eventSheet (גיליון האירוע)
         const eventData = await fetch(eventSheet, { cache: 'no-store' }).then(r => r.json());
         
-        // **התיקון:** סינון שורות ריקות ב-eventSheet
         const isDup = eventData.some(row => {
           const rowPhoneDigits = String(row.phone || '').replace(/\D/g, '');
-          // משווים רק אם יש מספר טלפון (אורך > 0) והוא זהה לטלפון הנוכחי.
           return rowPhoneDigits.length > 0 && rowPhoneDigits === phoneDigits;
         });
 
@@ -287,28 +285,39 @@
           return;
         }
 
-        // שמירה לאירוע
-        await fetch(eventSheet, {
+        // 2. שמירה ל-eventSheet עם בדיקת תקינות תגובת API (התיקון החדש)
+        const eventRes = await fetch(eventSheet, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
-        // הוספה לטבלה המרכזת אם עדיין לא קיים
+        const eventResultData = await eventRes.json();
+        if (!eventResultData || !eventResultData.length || eventResultData[0].phone !== phoneDigits) {
+             throw new Error("שגיאה בווידוא שמירת הנתונים לגיליון האירוע.");
+        }
+
+
+        // 3. הוספה לטבלה המרכזת אם עדיין לא קיים
         const masterData = await fetch(masterSheet, { cache: 'no-store' }).then(r => r.json());
         
-        // **התיקון:** סינון שורות ריקות ב-masterSheet
         const existsInMaster = masterData.some(row => {
             const rowPhoneDigits = String(row.phone || '').replace(/\D/g, '');
             return rowPhoneDigits.length > 0 && rowPhoneDigits === phoneDigits;
         });
         
         if (!existsInMaster) {
-          await fetch(masterSheet, {
+          // שמירה ל-masterSheet עם בדיקת תקינות תגובת API
+          const masterRes = await fetch(masterSheet, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
+          
+          const masterResultData = await masterRes.json();
+          if (!masterResultData || !masterResultData.length || masterResultData[0].phone !== phoneDigits) {
+               console.warn("שגיאה בווידוא שמירת הנתונים לגיליון המאסטר, ממשיכים.");
+          }
         }
 
         // הצלחה - איפוס תצוגתי
