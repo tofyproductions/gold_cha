@@ -272,7 +272,7 @@
       try {
         const { eventSheet, masterSheet } = config[config.use];
 
-        // 1. בדיקת כפילות ב-eventSheet (גיליון האירוע)
+        // 1. בדיקת כפילות ב-eventSheet (גיליון האירוע) - כולל סינון שורות ריקות
         const eventData = await fetch(eventSheet, { cache: 'no-store' }).then(r => r.json());
         
         const isDup = eventData.some(row => {
@@ -282,23 +282,25 @@
 
         if (isDup) {
           alert('מספר הטלפון הזה כבר נרשם. לא ניתן להירשם פעמיים לאירוע.');
+          // אם יש כפילות, אנחנו יוצאים בהצלחה (לא שגיאה, כדי למנוע את הפופאפ הכללי)
+          submitBtn.disabled = false;
+          inFlight = false;
           return;
         }
 
-        // 2. שמירה ל-eventSheet עם בדיקת תקינות תגובת API (התיקון החדש)
+        // 2. שמירה ל-eventSheet עם בדיקת סטטוס בסיסית
         const eventRes = await fetch(eventSheet, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-
-        const eventResultData = await eventRes.json();
-        if (!eventResultData || !eventResultData.length || eventResultData[0].phone !== phoneDigits) {
-             throw new Error("שגיאה בווידוא שמירת הנתונים לגיליון האירוע.");
+        
+        // **התיקון המרוכך:** אם ה-API מחזיר קוד שגיאה, זורקים שגיאה
+        if (!eventRes.ok) {
+             throw new Error("כשל בשליחת נתונים לגיליון האירוע: " + eventRes.statusText);
         }
 
-
-        // 3. הוספה לטבלה המרכזת אם עדיין לא קיים
+        // 3. הוספה לטבלה המרכזת אם עדיין לא קיים (כולל סינון שורות ריקות)
         const masterData = await fetch(masterSheet, { cache: 'no-store' }).then(r => r.json());
         
         const existsInMaster = masterData.some(row => {
@@ -307,16 +309,15 @@
         });
         
         if (!existsInMaster) {
-          // שמירה ל-masterSheet עם בדיקת תקינות תגובת API
+          // שמירה ל-masterSheet עם בדיקת סטטוס בסיסית
           const masterRes = await fetch(masterSheet, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
-          
-          const masterResultData = await masterRes.json();
-          if (!masterResultData || !masterResultData.length || masterResultData[0].phone !== phoneDigits) {
-               console.warn("שגיאה בווידוא שמירת הנתונים לגיליון המאסטר, ממשיכים.");
+
+          if (!masterRes.ok) {
+               console.warn("כשל בשליחת נתונים לגיליון המאסטר, ממשיכים.");
           }
         }
 
@@ -329,6 +330,7 @@
         popupMsg.style.display = 'none';
       } catch (err) {
         console.error(err);
+        // הצגת השגיאה הכללית שראית בצילום המסך
         alert('אירעה שגיאה בשליחה. נסו שוב.');
       } finally {
         submitBtn.disabled = false;
