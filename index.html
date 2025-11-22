@@ -135,19 +135,16 @@
     <h1>טופס הרשמה - אתגר הזהב</h1>
 
     <form id="goldenForm" novalidate>
-      <!-- שם פרטי -->
       <div class="field">
         <label for="firstName">שם פרטי</label>
         <input type="text" id="firstName" name="firstName" autocomplete="given-name" required>
       </div>
 
-      <!-- שם משפחה -->
       <div class="field">
         <label for="lastName">שם משפחה</label>
         <input type="text" id="lastName" name="lastName" autocomplete="family-name" required>
       </div>
 
-      <!-- טלפון -->
       <div class="field">
         <label for="phone">מספר פלאפון</label>
         <input
@@ -164,19 +161,16 @@
         <div id="phoneHelp" class="helper">דוגמה: 050-1234567. יש להזין מספר ישראלי בן 10 ספרות.</div>
       </div>
 
-      <!-- עיר -->
       <div class="field">
         <label for="city">עיר מגורים</label>
         <input type="text" id="city" name="city" autocomplete="address-level2" required>
       </div>
 
-      <!-- תאריך לידה -->
       <div class="field">
         <label for="dob">תאריך לידה</label>
         <input type="date" id="dob" name="dob" required>
       </div>
 
-      <!-- אישור תקנון -->
       <div class="checkbox-group">
         <label class="checkbox" for="agreeRules">
           <input type="checkbox" id="agreeRules" required>
@@ -280,7 +274,14 @@
 
         // בדיקת כפילות - מבוססת טלפון מנורמל
         const eventData = await fetch(eventSheet, { cache: 'no-store' }).then(r => r.json());
-        const isDup = eventData.some(row => String(row.phone || '').replace(/\D/g, '') === phoneDigits);
+        
+        // **התיקון:** סינון שורות ריקות ב-eventSheet
+        const isDup = eventData.some(row => {
+          const rowPhoneDigits = String(row.phone || '').replace(/\D/g, '');
+          // משווים רק אם יש מספר טלפון (אורך > 0) והוא זהה לטלפון הנוכחי.
+          return rowPhoneDigits.length > 0 && rowPhoneDigits === phoneDigits;
+        });
+
         if (isDup) {
           alert('מספר הטלפון הזה כבר נרשם. לא ניתן להירשם פעמיים לאירוע.');
           return;
@@ -295,7 +296,13 @@
 
         // הוספה לטבלה המרכזת אם עדיין לא קיים
         const masterData = await fetch(masterSheet, { cache: 'no-store' }).then(r => r.json());
-        const existsInMaster = masterData.some(row => String(row.phone || '').replace(/\D/g, '') === phoneDigits);
+        
+        // **התיקון:** סינון שורות ריקות ב-masterSheet
+        const existsInMaster = masterData.some(row => {
+            const rowPhoneDigits = String(row.phone || '').replace(/\D/g, '');
+            return rowPhoneDigits.length > 0 && rowPhoneDigits === phoneDigits;
+        });
+        
         if (!existsInMaster) {
           await fetch(masterSheet, {
             method: 'POST',
